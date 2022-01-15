@@ -7,18 +7,19 @@ class Base64URL {
     }
 }
 
+const algorithms = {
+    ES256: { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
+    ES384: { name: 'ECDSA', namedCurve: 'P-384', hash: { name: 'SHA-384' } },
+    ES512: { name: 'ECDSA', namedCurve: 'P-512', hash: { name: 'SHA-512' } },
+    HS256: { name: 'HMAC', hash: { name: 'SHA-256' } },
+    HS384: { name: 'HMAC', hash: { name: 'SHA-384' } },
+    HS512: { name: 'HMAC', hash: { name: 'SHA-512' } }
+}
+
 class JWT {
     constructor() {
         if (!crypto || !crypto.subtle)
             throw new Error('Crypto not supported!')
-        this.algorithms = {
-            ES256: { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } },
-            ES384: { name: 'ECDSA', namedCurve: 'P-384', hash: { name: 'SHA-384' } },
-            ES512: { name: 'ECDSA', namedCurve: 'P-512', hash: { name: 'SHA-512' } },
-            HS256: { name: 'HMAC', hash: { name: 'SHA-256' } },
-            HS384: { name: 'HMAC', hash: { name: 'SHA-384' } },
-            HS512: { name: 'HMAC', hash: { name: 'SHA-512' } }
-        }
     }
     _utf8ToUint8Array(str) {
         return Base64URL.parse(btoa(unescape(encodeURIComponent(str))))
@@ -59,7 +60,7 @@ class JWT {
             throw new Error('secret must be a string')
         if (typeof options.algorithm !== 'string')
             throw new Error('options.algorithm must be a string')
-        const importAlgorithm = this.algorithms[options.algorithm]
+        const importAlgorithm = algorithms[options.algorithm]
         if (!importAlgorithm)
             throw new Error('algorithm not found')
         payload.iat = Math.floor(Date.now() / 1000)
@@ -88,7 +89,7 @@ class JWT {
         const tokenParts = token.split('.')
         if (tokenParts.length !== 3)
             throw new Error('token must consist of 3 parts')
-        const importAlgorithm = this.algorithms[options.algorithm]
+        const importAlgorithm = algorithms[options.algorithm]
         if (!importAlgorithm)
             throw new Error('algorithm not found')
         const payload = this.decode(token)
